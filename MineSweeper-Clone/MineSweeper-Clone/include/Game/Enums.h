@@ -2,8 +2,42 @@
 
 namespace N_Game
 {
-	enum class Difficulty { EASY, MEDIUM, HARD };
-	enum class GameState { PLAYING, WON, LOST };
-	enum class CellState { HIDDEN, OPEN, FLAGGED };
-	enum class CellType { EMPTY, ONE, TWO, THREE, FOUR, FIVE, SIX, SEVEN, EIGHT, MINE};
+	// Defines difficulty levels for the game
+	enum class Difficulty 
+	{ 
+		EASY, 
+		MEDIUM, 
+		HARD 
+	};
+
+	// Represents current game state
+	enum class GameState 
+	{ 
+		PLAYING, 
+		WON, 
+		LOST 
+	};
+
+	// Represents visibility state of a cell
+	enum class CellState 
+	{ 
+		HIDDEN, 
+		OPEN, 
+		FLAGGED 
+	};
+	
+	// Represents type/content of a cell
+	enum class CellType 
+	{ 
+		EMPTY, 
+		ONE, 
+		TWO, 
+		THREE, 
+		FOUR, 
+		FIVE, 
+		SIX, 
+		SEVEN, 
+		EIGHT, 
+		MINE
+	};
 }
