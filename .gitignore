@@ -39,3 +39,41 @@
 
 # debug information files
 *.dwo
+
+# Visual Studio 2022
+.vs/
+*.VC.db
+*.ipch
+*.VC.opendb
+*.VC.VC.opendb
+*.VC.db-shm
+*.VC.db-wal
+
+# Build output
+Debug/
+Release/
+x64/
+x86/
+*.exe
+*.obj
+*.pdb
+*.ilk
+
+# User-specific files
+*.user
+*.suo
+*.sln.docstates
+
+# Compiled files
+*.o
+*.so
+*.dll
+*.lib
+
+# IDE files
+.vscode/
+.idea/
+
+# Backup files
+*.bak
+*.tmp
