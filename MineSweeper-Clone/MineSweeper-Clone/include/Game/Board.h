@@ -3,6 +3,7 @@
 #include <iostream>
 #include <vector>
 #include <iomanip>
+#include <random>
 #include "Enums.h"
 #include "Cell.h"
 
@@ -15,10 +16,13 @@ namespace N_Game
 
 		Difficulty currentDifficulty;
 		GameState currentGameState;
+
+		std::mt19937 randomEngine;
+		std::random_device rd;
 		
 		int numberOfRows;
 		int numberOfColumns;
-		int minesCount;
+		int maxMines;
 		
 		void initializeBoard(Difficulty diff);
 
@@ -26,7 +30,11 @@ namespace N_Game
 
 		bool isValidPosition(int row, int col) const;
 
+		void placeMines();
 
+		int countMinesAround(int row, int col);
+
+		void populateCells();
 
 	public:
 		Board(Difficulty diff);
