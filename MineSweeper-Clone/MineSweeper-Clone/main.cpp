@@ -1,20 +1,11 @@
 #include <iostream>
-#include "Game/Cell.h"
+#include "Game/Board.h"
 
 using namespace N_Game;
 int main()
 {
-    Cell cell;
-    std::cout << "Cell holds : " << cell.getCellDisplayString() << std::endl;
+    Board board(Difficulty::MEDIUM);
 
-    cell.setCellState(CellState::FLAGGED);
-
-    std::cout << "Cell holds : " << cell.getCellDisplayString() << std::endl;
-
-    cell.setCellState(CellState::OPEN);
-    cell.setCellType(CellType::MINE);
-
-    std::cout << "Cell holds : " << cell.getCellDisplayString() << std::endl;
-
+    board.displayBoard();
     return 0;
 }
