@@ -14,8 +14,6 @@ namespace N_Utility
 
 	void Utility::waitForEnter()
 	{
-		// Clear buffer then wait for Enter key
-		std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 		std::cin.get();
 	}
 

@@ -5,7 +5,7 @@ namespace N_Game
 	Board::Board(Difficulty diff)
 	{
 		firstCell = true;
-		flaggedCell = 0;
+		flaggedCells = 0;
 		currentDifficulty = diff;
 		currentGameState = GameState::PLAYING;
 
@@ -185,7 +185,7 @@ namespace N_Game
 		}
 	}
 
-	Cell* Board::getCell(int row, int col)
+	Cell* Board::getCell(int row, int col) const
 	{
 		if (!isValidPosition(row, col))
 			return nullptr;
@@ -386,6 +386,22 @@ namespace N_Game
 		currentGameState = GameState::PLAYING;
 
 		initializeBoard(diff);
+	}
+
+	bool Board::isValidMove(int row, int col, char action)  const
+	{
+		if (row < 0 || row >= numberOfRows || col < 0 || col >= numberOfColumns)
+			return false;
+
+		Cell* cell = getCell(row, col);
+
+		if (action == 'O' && cell->getCellState() == CellState::OPEN)
+			return false;
+		
+		if (action == 'F' && cell->getCellState() == CellState::OPEN)
+			return false;
+
+		return true;
 	}
 
 	GameState Board::getGameState() const { return currentGameState; }
