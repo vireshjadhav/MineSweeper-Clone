@@ -4,6 +4,8 @@ namespace N_Game
 {
 	Board::Board(Difficulty diff)
 	{
+		firstCell = true;
+		flaggedCell = 0;
 		currentDifficulty = diff;
 		currentGameState = GameState::PLAYING;
 
@@ -66,9 +68,6 @@ namespace N_Game
 				board[row][col] = new Cell();
 			}
 		}
-
-		placeMines();
-		populateCells();
 	}
 
 	void Board::displayBoard()
@@ -121,7 +120,7 @@ namespace N_Game
 		}
 	}
 
-	void Board::placeMines()
+	void Board::placeMines(int rowFirst, int colFirst)
 	{
 		std::uniform_int_distribution<int> rowDist(0, numberOfRows - 1);
 		std::uniform_int_distribution<int> colDist(0, numberOfColumns - 1);
@@ -134,14 +133,17 @@ namespace N_Game
 
 			Cell* cell = getCell(row, col);
 
+			if ((rowFirst == row && colFirst == col) || cell->getCellType() == CellType::MINE)
+			{
+				continue;
+			}
+
 			if (cell && cell->getCellType() != CellType::MINE)
 			{
 				cell->setCellType(CellType::MINE);
 				++minesPlaced;
 			}
 		}
-
-		std::cout << "Mines Placed: " << minesPlaced << std::endl;  //debug message
 	}
 
 	int Board::countMinesAround(int row, int col)
@@ -194,4 +196,199 @@ namespace N_Game
 	{
 		return (row >= 0 && col >= 0 && row < numberOfRows && col < numberOfColumns);
 	}
+
+	void Board::openCell(int row, int col)
+	{
+		if (currentGameState != GameState::PLAYING)
+		{
+			return;
+		}
+
+		Cell* cell = getCell(row, col);
+
+		if (!cell) return;
+
+		if (firstCell)
+		{
+			placeMines(row, col);
+			populateCells();
+			firstCell = false;
+		}
+
+		if (cell->getCellState() == CellState::FLAGGED)
+		{
+			std::cout << "Cell (" << row << ", " << col << ") is flagged. "
+				<< "Use 'F' again to unflag it first." << std::endl;
+			return;
+		}
+
+		if (cell->getCellState() == CellState::OPEN)
+		{
+			return;
+		}
+
+		switch (cell->getCellType())
+		{
+		case CellType::EMPTY:
+			processEmptyCell(row, col);
+			break;
+
+		case CellType::MINE:
+			revealAllMines();
+			currentGameState = GameState::LOST;
+			return;
+
+		default:
+			cell->setCellState(CellState::OPEN);
+			break;
+		}
+
+		if (checkAllCellOpen())
+		{
+			setGameState(GameState::WON);
+		}
+	}
+
+	void Board::processEmptyCell(int row, int col)
+	{
+		Cell* cell = getCell(row, col);
+
+		if (cell->getCellState() == CellState::OPEN || cell->getCellState() == CellState::FLAGGED)
+		{
+			return;
+		}
+
+		cell->setCellState(CellState::OPEN);
+
+		if (cell->getCellType() == CellType::EMPTY)
+		{
+			for (int a = -1; a <= 1; ++a)
+			{
+				for (int b = -1; b <= 1; ++b)
+				{
+					int neighborRow = row + a;
+					int neighborCol = col + b;
+
+					if ((a == 0 && b == 0) || !isValidPosition(neighborRow, neighborCol))
+					{
+						continue;
+					}
+
+					Cell* neighborCell = getCell(neighborRow, neighborCol);
+
+					if (neighborCell->getCellState() == CellState::FLAGGED)
+					{
+						continue;
+					}
+
+					if (neighborCell->getCellType() != CellType::MINE)
+					{
+						processEmptyCell(neighborRow, neighborCol);
+					}
+				}
+			}
+		}
+	}
+
+	void Board::revealAllMines()
+	{
+		for (int row = 0; row < numberOfRows; ++row)
+		{
+			for (int col = 0; col < numberOfColumns; ++col)
+			{
+				Cell* cell = getCell(row, col);
+				if (cell->getCellType() == CellType::MINE)
+				{
+					cell->setCellState(CellState::OPEN);
+				}
+			}
+		}
+	}
+
+	bool Board::checkAllCellOpen()
+	{
+		int totalCell = numberOfRows * numberOfColumns;
+		int cellCount = 0;
+
+		for (int row = 0; row < numberOfRows; ++row)
+		{
+			for (int col = 0; col < numberOfColumns; ++col)
+			{
+				Cell* cell = getCell(row, col);
+
+				if(cell->getCellState() == CellState::OPEN && cell->getCellType() != CellType::MINE)
+				{
+					cellCount++;
+				}
+			}
+		}
+
+		return cellCount == totalCell - maxMines;
+	}
+
+	void Board::flagToggle(int row, int col)
+	{
+		if (currentGameState != GameState::PLAYING)
+		{
+			return;
+		}
+
+		Cell* cell = getCell(row, col);
+
+		if (!cell) return;
+
+		if (cell->getCellState() == CellState::OPEN)
+		{
+			return;
+		}
+
+		if (cell->getCellState() == CellState::FLAGGED)
+		{
+			cell->setCellState(CellState::HIDDEN);
+			flaggedCells--;
+		}
+		else
+		{
+			cell->setCellState(CellState::FLAGGED);
+			flaggedCells++;
+		}
+	}
+
+	void Board::setGameState(GameState state)
+	{
+		currentGameState = state;
+	}
+
+	int Board::getRows() { return numberOfRows;	}
+
+	int Board::getColumns() { return numberOfColumns; }
+
+	int Board::getRemainingMines() { return maxMines - flaggedCells; }
+
+	void Board::clearBoard()
+	{
+		for (int row = 0; row < numberOfRows; ++row)
+		{
+			for (int col = 0; col < numberOfColumns; ++col)
+			{
+				delete board[row][col];
+			}
+		}
+		board.clear();
+	}
+
+	void Board::reset(Difficulty diff)
+	{
+		clearBoard();
+
+		firstCell = true;
+		flaggedCells = 0;
+		currentGameState = GameState::PLAYING;
+
+		initializeBoard(diff);
+	}
+
+	GameState Board::getGameState() const { return currentGameState; }
+
+	bool Board::isGameOver() const { return currentGameState != GameState::PLAYING; }
 }

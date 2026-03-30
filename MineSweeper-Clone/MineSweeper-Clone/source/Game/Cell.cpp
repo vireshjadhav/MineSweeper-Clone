@@ -3,7 +3,7 @@
 namespace N_Game
 {
 	// Default initialization: empty cell, hidden state
-	Cell::Cell() :  currentCellType(CellType::EMPTY), currentCellState(CellState::OPEN) { }
+	Cell::Cell() :  currentCellType(CellType::EMPTY), currentCellState(CellState::HIDDEN) { }
 
 	// Returns display string based on current cell state
 	std::string Cell::getCellString() const
