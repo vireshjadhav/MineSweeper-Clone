@@ -23,6 +23,9 @@ namespace N_Game
 		int numberOfRows;
 		int numberOfColumns;
 		int maxMines;
+		int flaggedCells;
+
+		bool firstCell;
 		
 		void initializeBoard(Difficulty diff);
 
@@ -30,11 +33,20 @@ namespace N_Game
 
 		bool isValidPosition(int row, int col) const;
 
-		void placeMines();
+
+		void placeMines(int row, int col);
 
 		int countMinesAround(int row, int col);
 
 		void populateCells();
+
+		void processEmptyCell(int row, int col);
+
+		void revealAllMines();
+
+		bool checkAllCellOpen();
+
+		void clearBoard();
 
 	public:
 		Board(Difficulty diff);
@@ -46,5 +58,23 @@ namespace N_Game
 		void displayBoard();
 
 		Cell* getCell(int row, int col);
+
+		void openCell(int row, int col);
+
+		void flagToggle(int row, int col);
+
+		int getRows();
+
+		int getColumns();
+
+		void setGameState(GameState state);
+
+		int getRemainingMines();
+
+		void reset(Difficulty diff);
+
+		GameState getGameState() const;
+
+		bool isGameOver() const;
 	};
 }
