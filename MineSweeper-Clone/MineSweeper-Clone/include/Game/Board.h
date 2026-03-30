@@ -57,11 +57,13 @@ namespace N_Game
 
 		void displayBoard();
 
-		Cell* getCell(int row, int col);
+		Cell* getCell(int row, int col) const;
 
 		void openCell(int row, int col);
 
 		void flagToggle(int row, int col);
+
+		bool isValidMove(int row, int col, char action) const;
 
 		int getRows();
 

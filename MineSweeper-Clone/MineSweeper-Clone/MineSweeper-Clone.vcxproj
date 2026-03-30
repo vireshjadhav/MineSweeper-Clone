@@ -127,12 +127,14 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="source\Game\Board.cpp" />
     <ClCompile Include="source\Game\Cell.cpp" />
+    <ClCompile Include="source\UI\ConsoleUI.cpp" />
     <ClCompile Include="source\Utility\Utility.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\Game\Board.h" />
     <ClInclude Include="include\Game\Cell.h" />
     <ClInclude Include="include\Game\Enums.h" />
+    <ClInclude Include="include\UI\ConsoleUI.h" />
     <ClInclude Include="include\Utility\Utility.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
