@@ -34,6 +34,8 @@ namespace N_UI
 		
 		void showGameOver();
 
+		void showGameWon();
+
 		void displayBoard(N_Game::Board& board);
 	};
 }
