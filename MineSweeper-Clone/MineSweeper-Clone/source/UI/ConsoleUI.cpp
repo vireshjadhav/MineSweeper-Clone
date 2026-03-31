@@ -11,11 +11,11 @@ namespace N_UI
 
 	void ConsoleUI::showTitle()
 	{
-        std::cout << "----------------------------------------------------------------------"
-                   "\n|                                                                    |"
-                   "\n|                  WELCOME TO MINESWEEPER GAME                       |"
-                   "\n|                                                                    |"
-                   "\n----------------------------------------------------------------------" << std::endl;
+        std::cout << "                       ----------------------------------------------------------------------"
+                   "\n                       |                                                                    |"
+                   "\n                       |                  WELCOME TO MINESWEEPER GAME                       |"
+                   "\n                       |                                                                    |"
+                   "\n                       ----------------------------------------------------------------------" << std::endl;
 	}
 
     void ConsoleUI::showRule()
@@ -36,6 +36,7 @@ namespace N_UI
                      "\n                       |                            GAME STARTS                              |"
                      "\n                       |                                                                     |"
                      "\n                       -----------------------------------------------------------------------" << std::endl;
+        std::cout << std::endl;
     }
 
     void ConsoleUI::showHowToPlay()
@@ -73,8 +74,18 @@ namespace N_UI
 
     void ConsoleUI::showGameOver()
     {
-        std::cout << "**BOOM! You step on Mine!**" << std::endl;
-        std::cout << "***Game Over***" << std::endl;
+        std::cout << "\n                                         ************************************" << std::endl;
+        std::cout << "                                         *          GAME OVER               *" << std::endl;
+        std::cout << "                                         *      You stepped on a mine!      *" << std::endl;
+        std::cout << "                                         ************************************" << std::endl;
+    }
+
+    void ConsoleUI::showGameWon()
+    {
+        std::cout << "\n                                         ************************************" << std::endl;
+        std::cout << "                                         *             YOU WON!              *" << std::endl;
+        std::cout << "                                         *     All safe cells uncovered!     *" << std::endl;
+        std::cout << "                                         *************************************" << std::endl;
     }
 
     void ConsoleUI::showInvalidCoordinates()
