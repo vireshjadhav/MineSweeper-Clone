@@ -3,6 +3,7 @@
 #include <iostream>
 #include "Utility/Utility.h"
 #include "Game/Board.h"
+#include "Game/Timer.h"
 
 namespace N_UI
 {
@@ -21,8 +22,6 @@ namespace N_UI
 		void showRule();
 		
 		void showHowToPlay();
-		
-		void showStartTitle();
 
 		int getDifficultyChoice();
 		
@@ -31,7 +30,11 @@ namespace N_UI
 		void showInvalidAction();
 		
 		void getUserInput(int& row, int& col, char& action, N_Game::Board& board);
+
+		void showGameStats(int remainingTime, int remainingMines);
 		
+		void showTimesUp();
+
 		void showGameOver();
 
 		void showGameWon();

@@ -1,3 +1,4 @@
+#include <iomanip>
 #include "UI/ConsoleUI.h"
 #include "Utility/Utility.h"
 
@@ -27,16 +28,6 @@ namespace N_UI
                      "\n   you can determine cells that are safe, and cells that contains mines." << std::endl;
         std::cout << "4. Interact, evolve and enjoy!";
         utility.waitForEnter();
-    }
-
-    void ConsoleUI::showStartTitle()
-    {
-        std::cout << "\n                       -----------------------------------------------------------------------"
-                     "\n                       |                                                                     |"
-                     "\n                       |                            GAME STARTS                              |"
-                     "\n                       |                                                                     |"
-                     "\n                       -----------------------------------------------------------------------" << std::endl;
-        std::cout << std::endl;
     }
 
     void ConsoleUI::showHowToPlay()
@@ -75,8 +66,16 @@ namespace N_UI
     void ConsoleUI::showGameOver()
     {
         std::cout << "\n                                         ************************************" << std::endl;
-        std::cout << "                                         *          GAME OVER               *" << std::endl;
+        std::cout << "                                         *            GAME OVER             *" << std::endl;
         std::cout << "                                         *      You stepped on a mine!      *" << std::endl;
+        std::cout << "                                         ************************************" << std::endl;
+    }
+
+    void ConsoleUI::showTimesUp()
+    {
+        std::cout << "\n                                         ************************************" << std::endl;
+        std::cout << "                                         *            GAME OVER             *" << std::endl;
+        std::cout << "                                         *            Time's Up!            *" << std::endl;
         std::cout << "                                         ************************************" << std::endl;
     }
 
@@ -86,6 +85,17 @@ namespace N_UI
         std::cout << "                                         *             YOU WON!              *" << std::endl;
         std::cout << "                                         *     All safe cells uncovered!     *" << std::endl;
         std::cout << "                                         *************************************" << std::endl;
+    }
+
+    void ConsoleUI::showGameStats(int remainingTime, int remainingMines)
+    {
+        std::cout << "\n                       ======================================================================="
+                     "\n                       |                             MINESWEEPER                             |"
+                     "\n                       |                         Time Left: " << std::setw(2) << std::setfill('0') << remainingTime << " sec                          |"
+                     "\n                       |                           Mines Left: " << std::setw(2) << std::setfill('0') << remainingMines << "                            |"
+                     "\n                       =======================================================================" << std::endl;
+        std::cout << std::endl;
+        std::cout << std::setfill(' ');
     }
 
     void ConsoleUI::showInvalidCoordinates()
@@ -135,7 +145,6 @@ namespace N_UI
 
     int ConsoleUI::getDifficultyChoice()
     {
-        utility.clearInputBuffer();
         int diff;
         std::cout << "Please select a difficulty level: " << std::endl;
         std::cout << "1. Beginner  (9x9, 10 mines)" << std::endl;
@@ -158,8 +167,8 @@ namespace N_UI
 
         diff -= 1;
 
-        return diff;
         utility.clearConsole();
+        return diff;
     }
 
     void ConsoleUI::displayBoard(Board& board)
