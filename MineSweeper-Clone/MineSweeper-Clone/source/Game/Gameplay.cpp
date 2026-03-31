@@ -5,7 +5,7 @@
 using namespace N_UI;
 namespace N_Game
 {
-	Gameplay::Gameplay()
+	Gameplay::Gameplay() : timer(600)
 	{
 		ui = new ConsoleUI();
 		board = nullptr;
@@ -33,12 +33,41 @@ namespace N_Game
 			delete board;
 		}
 
+		int second = 600;
+
+		switch (diff)
+		{
+		case 2:
+			second = 1200;
+			break;
+
+		case 1:
+			second = 900;
+			break;
+
+		case 0:
+			second = 600;
+			break;
+		}
+
+		timer = Timer(second);
+
 		board = new Board(static_cast<Difficulty>(diff));
+		timer.reset();
+		timer.start();
 	}
 
 	GameState Gameplay::getGameState() const
 	{
 		return board->getGameState();
+	}
+
+	void Gameplay::handleTimesUp()
+	{
+		utility.clearConsole();
+		ui->showGameStats(timer.getRemainingSeconds(), board->getRemainingMines());
+		board->displayBoard();
+		ui->showTimesUp();
 	}
 
 	void Gameplay::run()
@@ -48,13 +77,22 @@ namespace N_Game
 
 		utility.clearConsole();
 
-		ui->showStartTitle();
 
 		int row, col;
 		char action;
 
 		while (getGameState() == GameState::PLAYING)
 		{
+
+			if (timer.isTimeUp())
+			{
+				handleTimesUp();
+				break;
+			}
+
+			utility.clearConsole();
+			ui->showGameStats(timer.getRemainingSeconds(), board->getRemainingMines());
+			
 			ui->displayBoard(*board);
 
 			ui->getUserInput(row, col, action, *board);
@@ -75,13 +113,21 @@ namespace N_Game
 			}
 		}
 
-		if (getGameState() == GameState::WON)
+		if (timer.isTimeUp())
 		{
+			handleTimesUp();
+		}
+		else if (getGameState() == GameState::WON)
+		{
+			utility.clearConsole();
+			ui->showGameStats(timer.getRemainingSeconds(), board->getRemainingMines());
 			board->displayBoard();
 			ui->showGameWon();
 		}
 		else if (getGameState() == GameState::LOST)
 		{
+			utility.clearConsole();
+			ui->showGameStats(timer.getRemainingSeconds(), board->getRemainingMines());
 			board->displayBoard();
 			ui->showGameOver();
 		}
