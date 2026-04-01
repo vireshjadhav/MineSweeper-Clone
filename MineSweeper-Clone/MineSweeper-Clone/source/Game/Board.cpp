@@ -2,30 +2,26 @@
 
 namespace N_Game
 {
+	// Constructor: Initializes board state and seeds random engine
 	Board::Board(Difficulty diff)
 	{
-		firstCell = true;
-		flaggedCells = 0;
-		currentDifficulty = diff;
-		currentGameState = GameState::PLAYING;
+		firstCell = true;                                  // First click safety flag
+		flaggedCells = 0;								   // Track number of flagged cells
+		currentDifficulty = diff;                          // Store selected difficulty
+		currentGameState = GameState::PLAYING;             // Initial game state
 
-		randomEngine.seed(rd());
+		randomEngine.seed(rd());                           // Seed RNG with random device
 
-		initializeBoard(currentDifficulty);
+		initializeBoard(currentDifficulty);                // Setup board dimensions and cells
 	}
 
+	// Destructor: Clean up dynamically allocated memory
 	Board::~Board() 
 	{
-		for (int row = 0; row < numberOfRows; ++row)
-		{
-			for (int col = 0; col < numberOfColumns; ++col)
-			{
-				delete board[row][col];
-				board[row][col] = nullptr;
-			}
-		}
+		clearBoard();
 	}
 
+	// Sets board size and mine count based on difficulty
 	void Board::initializeBoard(Difficulty diff)
 	{
 		switch (diff)
@@ -48,15 +44,16 @@ namespace N_Game
 			maxMines = 90;
 			break;
 
-		default:
+		default:						    // Fallback safety
 			numberOfRows = 9;
 			numberOfColumns = 9;
 			maxMines = 10;
 			break;
 		}
-		createBoard();
+		createBoard();					    // Allocate cells
 	}
 
+	// Allocates 2D grid of Cell pointers
 	void Board::createBoard()
 	{
 		board.resize(numberOfRows);
@@ -70,9 +67,12 @@ namespace N_Game
 		}
 	}
 
+	// Displays board in console with formatting
 	void Board::displayBoard()
 	{
 		std::string padding;
+
+		// Adjust UI spacing based on board size
 		switch (currentDifficulty)
 		{
 		case Difficulty::EASY:
@@ -86,6 +86,7 @@ namespace N_Game
 			break;
 		}
 
+		// Column headers
 		std::cout << padding << "   ";
 		for (size_t i = 0; i < numberOfColumns; ++i)
 		{
@@ -93,6 +94,7 @@ namespace N_Game
 		}
 		std::cout << std::endl;
 
+		// Top border
 		std::cout << padding << "   ";
 		for (size_t col = 0; col < numberOfColumns; ++col)
 		{
@@ -100,6 +102,7 @@ namespace N_Game
 		}
 		std::cout << "-" << std::endl;
 
+		// Rows
 		for (size_t row = 0; row < numberOfRows; ++row)
 		{
 			std::cout << padding << std::setw(2) << row << " ";
@@ -120,6 +123,7 @@ namespace N_Game
 		}
 	}
 
+	// Randomly places mines, avoiding first clicked cell
 	void Board::placeMines(int rowFirst, int colFirst)
 	{
 		std::uniform_int_distribution<int> rowDist(0, numberOfRows - 1);
@@ -133,11 +137,13 @@ namespace N_Game
 
 			Cell* cell = getCell(row, col);
 
+			// Skip first clicked cell and already placed mines
 			if ((rowFirst == row && colFirst == col) || cell->getCellType() == CellType::MINE)
 			{
 				continue;
 			}
 
+			// Place mine
 			if (cell && cell->getCellType() != CellType::MINE)
 			{
 				cell->setCellType(CellType::MINE);
@@ -146,6 +152,7 @@ namespace N_Game
 		}
 	}
 
+	// Counts number of mines around a given cell
 	int Board::countMinesAround(int row, int col)
 	{
 		int minesAround = 0;
@@ -154,6 +161,7 @@ namespace N_Game
 		{
 			for (int b = -1; b <= 1; ++b)
 			{
+				// Skip self and invalid positions
 				if ((a == 0 && b == 0) || !isValidPosition(row + a, col + b))
 				{
 					continue;
@@ -169,6 +177,7 @@ namespace N_Game
 		return minesAround;
 	}
 
+	// Assigns numbers to non-mine cells
 	void Board::populateCells()
 	{
 		for (int row = 0; row < numberOfRows; ++row)
@@ -179,12 +188,15 @@ namespace N_Game
 				if (cell && cell->getCellType() != CellType::MINE)
 				{
 					int minesAround = countMinesAround(row, col);
+
+					// Store number as CellType (0–8)
 					cell->setCellType(static_cast<CellType>(minesAround));
 				}
 			}
 		}
 	}
 
+	// Returns pointer to cell, or nullptr if invalid
 	Cell* Board::getCell(int row, int col) const
 	{
 		if (!isValidPosition(row, col))
@@ -192,13 +204,16 @@ namespace N_Game
 		return board[row][col];
 	}
 
+	// Checks if given position is inside board bounds
 	bool Board::isValidPosition(int row, int col) const
 	{
 		return (row >= 0 && col >= 0 && row < numberOfRows && col < numberOfColumns);
 	}
 
+	// Handles opening a cell
 	void Board::openCell(int row, int col)
 	{
+		// Ignore if game already ended
 		if (currentGameState != GameState::PLAYING)
 		{
 			return;
@@ -208,6 +223,7 @@ namespace N_Game
 
 		if (!cell) return;
 
+		// First click: generate mines AFTER first move
 		if (firstCell)
 		{
 			placeMines(row, col);
@@ -215,6 +231,7 @@ namespace N_Game
 			firstCell = false;
 		}
 
+		// Prevent opening flagged cells
 		if (cell->getCellState() == CellState::FLAGGED)
 		{
 			std::cout << "Cell (" << row << ", " << col << ") is flagged. "
@@ -222,15 +239,17 @@ namespace N_Game
 			return;
 		}
 
+		// Ignore already opened cells
 		if (cell->getCellState() == CellState::OPEN)
 		{
 			return;
 		}
 
+		// Handle based on cell type
 		switch (cell->getCellType())
 		{
 		case CellType::EMPTY:
-			processEmptyCell(row, col);
+			processEmptyCell(row, col);				// Flood fill
 			break;
 
 		case CellType::MINE:
@@ -243,16 +262,19 @@ namespace N_Game
 			break;
 		}
 
+		// Check win condition
 		if (checkAllCellOpen())
 		{
 			setGameState(GameState::WON);
 		}
 	}
 
+	// Recursive flood fill for empty cells
 	void Board::processEmptyCell(int row, int col)
 	{
 		Cell* cell = getCell(row, col);
 
+		// Stop if already processed or flagged
 		if (cell->getCellState() == CellState::OPEN || cell->getCellState() == CellState::FLAGGED)
 		{
 			return;
@@ -260,6 +282,7 @@ namespace N_Game
 
 		cell->setCellState(CellState::OPEN);
 
+		// Expand only if empty
 		if (cell->getCellType() == CellType::EMPTY)
 		{
 			for (int a = -1; a <= 1; ++a)
@@ -276,11 +299,13 @@ namespace N_Game
 
 					Cell* neighborCell = getCell(neighborRow, neighborCol);
 
+					// Skip flagged cells
 					if (neighborCell->getCellState() == CellState::FLAGGED)
 					{
 						continue;
 					}
 
+					// Recurse if safe
 					if (neighborCell->getCellType() != CellType::MINE)
 					{
 						processEmptyCell(neighborRow, neighborCol);
@@ -290,6 +315,7 @@ namespace N_Game
 		}
 	}
 
+	// Reveals all mines (game over)
 	void Board::revealAllMines()
 	{
 		for (int row = 0; row < numberOfRows; ++row)
@@ -305,6 +331,7 @@ namespace N_Game
 		}
 	}
 
+	// Checks if all safe cells are opened (win condition)
 	bool Board::checkAllCellOpen()
 	{
 		int totalCell = numberOfRows * numberOfColumns;
@@ -326,6 +353,7 @@ namespace N_Game
 		return cellCount == totalCell - maxMines;
 	}
 
+	// Toggles flag state on a cell
 	void Board::flagToggle(int row, int col)
 	{
 		if (currentGameState != GameState::PLAYING)
@@ -334,9 +362,9 @@ namespace N_Game
 		}
 
 		Cell* cell = getCell(row, col);
-
 		if (!cell) return;
 
+		// Cannot flag opened cell
 		if (cell->getCellState() == CellState::OPEN)
 		{
 			return;
@@ -345,38 +373,51 @@ namespace N_Game
 		if (cell->getCellState() == CellState::FLAGGED)
 		{
 			cell->setCellState(CellState::HIDDEN);
-			flaggedCells--;
+			flaggedCells = std::max(0, flaggedCells - 1);
 		}
 		else
 		{
 			cell->setCellState(CellState::FLAGGED);
-			flaggedCells++;
+			flaggedCells = std::min(maxMines, flaggedCells + 1);
 		}
 	}
 
+	// Sets current game state
 	void Board::setGameState(GameState state)
 	{
 		currentGameState = state;
 	}
 
-	int Board::getRows() { return numberOfRows;	}
+	// Getters
+	int Board::getRows() const { return numberOfRows;	}
 
-	int Board::getColumns() { return numberOfColumns; }
+	int Board::getColumns() const { return numberOfColumns; }
 
-	int Board::getRemainingMines() { return maxMines - flaggedCells; }
+	int Board::getRemainingMines() const { return maxMines - flaggedCells; }
 
+	GameState Board::getGameState() const { return currentGameState; }
+
+	// Returns true if game is finished
+	bool Board::isGameOver() const { return currentGameState != GameState::PLAYING; }
+
+	// Frees all dynamically allocated cells
 	void Board::clearBoard()
 	{
-		for (int row = 0; row < numberOfRows; ++row)
+		if (!board.empty())
 		{
-			for (int col = 0; col < numberOfColumns; ++col)
+			for (int row = 0; row < numberOfRows; ++row)
 			{
-				delete board[row][col];
+				for (int col = 0; col < numberOfColumns; ++col)
+				{
+					delete board[row][col];
+					board[row][col] = nullptr;
+				}
 			}
 		}
 		board.clear();
 	}
 
+	// Resets board for new game
 	void Board::reset(Difficulty diff)
 	{
 		clearBoard();
@@ -388,6 +429,7 @@ namespace N_Game
 		initializeBoard(diff);
 	}
 
+	// Validates user move
 	bool Board::isValidMove(int row, int col, char action)  const
 	{
 		if (row < 0 || row >= numberOfRows || col < 0 || col >= numberOfColumns)
@@ -395,6 +437,7 @@ namespace N_Game
 
 		Cell* cell = getCell(row, col);
 
+		// Cannot open or flag already opened cell
 		if (action == 'O' && cell->getCellState() == CellState::OPEN)
 			return false;
 		
@@ -403,8 +446,4 @@ namespace N_Game
 
 		return true;
 	}
-
-	GameState Board::getGameState() const { return currentGameState; }
-
-	bool Board::isGameOver() const { return currentGameState != GameState::PLAYING; }
 }
