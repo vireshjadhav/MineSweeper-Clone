@@ -10,6 +10,7 @@ namespace N_UI
 
     ConsoleUI::~ConsoleUI() {}
 
+    // Displays game title banner
 	void ConsoleUI::showTitle()
 	{
         std::cout << "                       ----------------------------------------------------------------------"
@@ -19,6 +20,7 @@ namespace N_UI
                    "\n                       ----------------------------------------------------------------------" << std::endl;
 	}
 
+    // Displays game rules
     void ConsoleUI::showRule()
     {
         std::cout << "\n RULES: " << std::endl;
@@ -27,9 +29,10 @@ namespace N_UI
         std::cout << "3. The number of a cell shows the number of mines adjacent to it. using this information, "
                      "\n   you can determine cells that are safe, and cells that contains mines." << std::endl;
         std::cout << "4. Interact, evolve and enjoy!";
-        utility.waitForEnter();
+        utility.waitForEnter(); // Pause for user to read
     }
 
+    // Displays step-by-step instructions
     void ConsoleUI::showHowToPlay()
     {
         std::cout << "\n======How to Play======\n" << std::endl;
@@ -63,6 +66,7 @@ namespace N_UI
         utility.waitForEnter();
     }
 
+    // Displays game over message (mine hit)
     void ConsoleUI::showGameOver()
     {
         std::cout << "\n                                         ************************************" << std::endl;
@@ -71,6 +75,7 @@ namespace N_UI
         std::cout << "                                         ************************************" << std::endl;
     }
 
+    // Displays game over message (time expired)
     void ConsoleUI::showTimesUp()
     {
         std::cout << "\n                                         ************************************" << std::endl;
@@ -79,6 +84,7 @@ namespace N_UI
         std::cout << "                                         ************************************" << std::endl;
     }
 
+    // Displays win message
     void ConsoleUI::showGameWon()
     {
         std::cout << "\n                                         ************************************" << std::endl;
@@ -87,6 +93,7 @@ namespace N_UI
         std::cout << "                                         *************************************" << std::endl;
     }
 
+    // Displays current game stats (time + mines left)
     void ConsoleUI::showGameStats(int remainingTime, int remainingMines)
     {
         std::cout << "\n                       ======================================================================="
@@ -95,54 +102,81 @@ namespace N_UI
                      "\n                       |                           Mines Left: " << std::setw(2) << std::setfill('0') << remainingMines << "                            |"
                      "\n                       =======================================================================" << std::endl;
         std::cout << std::endl;
-        std::cout << std::setfill(' ');
+        std::cout << std::setfill(' ');         // Reset fill character
     }
 
+    // Shows invalid coordinate message
     void ConsoleUI::showInvalidCoordinates()
     {
         std::cout << "Invalid coordinates. Try again." << std::endl;
     }
 
+    // Shows invalid action message
     void ConsoleUI::showInvalidAction()
     {
-        std::cout << "Invalid action. Use O or F." << std::endl;
+        std::cout << "Invalid action. Use O or F or Q." << std::endl;
     }
 
+    // Handles invalid input (cin fail state)
+    void ConsoleUI::handleInputFailure()
+    {
+        utility.clearConsole();
+        utility.clearInputBuffer();
+
+        std::cout << "Invalid input format." << std::endl;
+    }
+
+    // Gets validated user input (loop until valid)
     void ConsoleUI::getUserInput(int& row, int& col, char& action, Board& board)
     {
         while (true)
         {
-            std::cout << "Enter move (O Open/ F Flag) followed by Row and Col: ";
+            std::cout << "Enter move (O Open/ F Flag/ Q Quit): ";
+            std::cin >> action;
 
-            std::cin >> action >> row >> col;
-
-            action = toupper(action);
+            action = toupper(action);       // Normalize input
 
             if (std::cin.fail())
             {
-                utility.clearConsole();
-                utility.clearInputBuffer();
-
-                std::cout << "Invalid input format." << std::endl;
+                handleInputFailure();
                 continue;
             }
 
+            // Quit option
+            if (action == 'Q')
+            {
+                return;
+            }
+
+            // Validate action
             if (action != 'O' && action != 'F')
             {
                 showInvalidAction();
                 continue;
             }
 
+            std::cout << "Enter Row and Column (e.g., 2 3): ";
+
+            std::cin >> row >> col;
+
+            if (std::cin.fail())
+            {
+                handleInputFailure();
+                continue;
+            }
+
+            // Validate move with board logic
             if (!board.isValidMove(row, col, action))
             {
                 showInvalidCoordinates();
                 continue;
             }
 
-            return;
+            return;      // Valid input
         }
     }
 
+    // Gets difficulty selection from user
     int ConsoleUI::getDifficultyChoice()
     {
         int diff;
@@ -156,6 +190,7 @@ namespace N_UI
         {
             std::cin >> diff;
 
+            // Validate input
             if (std::cin.fail() || diff < 1 || diff > 3)
             {
                 utility.clearInputBuffer();
@@ -165,14 +200,44 @@ namespace N_UI
             break;
         }
 
-        diff -= 1;
+        diff -= 1;      // Convert to 0-based enum
 
         utility.clearConsole();
         return diff;
     }
 
+    // Displays board using Board class
     void ConsoleUI::displayBoard(Board& board)
     {
         board.displayBoard();
+    }
+
+    // Asks user to restart or quit
+    bool ConsoleUI::confirmRestart()
+    {
+        char choice;
+        std::cout << "Would you like to play again? (R = Restart, Q = Quit): ";
+        while (true)
+        {
+            std::cin >> choice;
+
+            choice = toupper(choice);
+
+            if (choice == 'Q')
+            {
+                std::cout << "Exiting game...\n";
+                return false;
+            }
+            else if (choice == 'R')
+            {
+                return true;
+            }
+            else
+            {
+                utility.clearInputBuffer();
+                std::cout << "Invalid choice. Enter R = Restart or Q = Quit: ";
+                continue;
+            }
+        }
     }
 }
